@@ -1,4 +1,4 @@
-# This Dockerfile creates an image of ParaView_5.1.2 with OpenGL, MPICH, X Window System, Python and FFmpeg.
+# This Dockerfile creates the Docker image of ParaView (v5.1.2).
 
 # FROM CentOS
 FROM centos:latest
@@ -6,25 +6,22 @@ FROM centos:latest
 # MAINTAINER is ishidakauya
 MAINTAINER ishidakazuya
 
-# ADD the script for installation of ParaView 
+# ADD the shellscript for install
 ADD install.sh /root
 
 # Install ParaView
 RUN yum -y update \
-&& yum -y install mpich mpich-devel gcc gcc-c++ make git python-devel numpy mesa* llvm llvm-devel boost boost-devel \ 
+&& yum -y install mpich mpich-devel gcc gcc-c++ make git python-devel mesa* boost boost-devel \ 
 && yum -y groupinstall "X Window System" \
-&& yum clean all \
-&& git clone https://github.com/FFmpeg/FFmpeg /FFmpeg \
-&& cd /FFmpeg \
-&& ./configure --disable-yasm --enable-shared \
+&& git clone https://github.com/FFmpeg/FFmpeg /root/FFmpeg \
+&& cd /root/FFmpeg \
+&& ./configure --disable-x86asm --enable-shared \
 && make -j8 \
 && make install \
-&& rm -rf /FFmpeg \
-&& cd / \ 
+&& cd /root \ 
 && curl -O https://cmake.org/files/v3.6/cmake-3.6.2.tar.gz \
 && tar -xvf cmake-3.6.2.tar.gz \
-&& rm -f cmake-3.6.2.tar.gz \
-&& cd /cmake-3.6.2 \
+&& cd /root/cmake-3.6.2 \
 && ./configure \
 && gmake -j8 \
 && gmake install \
@@ -38,13 +35,24 @@ RUN yum -y update \
 && git submodule update \
 && cd /root/build \
 && bash install.sh \
-&& rm -rf /root/ParaView_src \
 && rm -rf /root/build \
+&& rm -rf /root/ParaView_src \
+&& rm -rf /root/cmake-3.6.2 \
+&& rm -rf /root/cmake-3.6.2.tar.gz \
+&& rm -rf /root/FFmpeg \
 && yum -y remove gcc gcc-c++ git make \
-&& yum clean all 
+&& yum clean all \
+&& mkdir /usr/local/ParaView_5.1.2 \
+&& mv /root/include /usr/local/ParaView_5.1.2 \
+&& mv /root/bin /usr/local/ParaView_5.1.2 \
+&& mv /root/lib /usr/local/ParaView_5.1.2 \
+&& mv /root/share /usr/local/ParaView_5.1.2
 
 # Set PATH
-ENV PATH=$PATH:/usr/lib64/mpich/bin
+ENV PATH=$PATH:/usr/lib64/mpich/bin:/usr/local/ParaView_5.1.2/bin
+
+# EXPOSE Port 11111
+EXPOSE 11111
 
 # CMD is /bin/bash
 CMD /bin/bash

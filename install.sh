@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# This script is for compiling ParaView with OpenGL, OpenGLU, MPICH, Python and FFmpeg.
-# First, Makefile is created by CMake with flags.
-# Then, "make -j8" and "make -j8 install" are executed.
+# This script compilies ParaView (v5.1.2).
+# First, Cmake creates the Makefile in accordance with the flags.
+# Then, "make -j8" and "make install" are executed.
 
 cmake -D BUILD_DOCUMENTATION:BOOL=OFF \
       -D BUILD_EXAMPLES:BOOL=OFF \
@@ -15,12 +15,12 @@ cmake -D BUILD_DOCUMENTATION:BOOL=OFF \
       -D PARAVIEW_ENABLE_COPROCESSING:BOOL=ON \
       -D PARAVIEW_INSTALL_DEVELOPMENT_FILES:BOOL=ON \
       -D PARAVIEW_USE_VISITBRIDGE:BOOL=ON \
-      -D PARAVIEW_USE_BOOST:BOOL=ON \
       -D VTK_RENDERING_BACKEND=OpenGL2 \
       -D VTK_USE_X:BOOL=ON \
       -D OPENGL_INCLUDE_DIR=/usr/include \
+      -D OPENGL_xmesa_INCLUDE_DIR= \
       -D OPENGL_gl_LIBRARY=/usr/lib64/libGL.so \
-      -D OPENGL_glu_LIBRARY=/usr/lib64/libGLU.so \
+      -D OPENGL_glu_LIBRARY= \
       -D PARAVIEW_ENABLE_PYTHON:BOOL=ON \
       -D PYTHON_LIBRARY=/usr/lib64/libpython2.7.so \
       -D PYTHON_INCLUDE_DIR=/usr/include/python2.7 \
