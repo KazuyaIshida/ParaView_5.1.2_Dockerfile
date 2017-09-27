@@ -39,6 +39,5 @@ cmake -D BUILD_DOCUMENTATION:BOOL=OFF \
       /root/ParaView_src
 
 make -j8
-
 make install
 
