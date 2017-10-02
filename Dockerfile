@@ -9,9 +9,9 @@ MAINTAINER ishidakazuya
 # ADD the shellscript for install
 ADD install.sh /root
 
-# Install ParaView
+# Install ParaView and dependencies
 RUN yum -y update \
-&& yum -y install mpich mpich-devel gcc gcc-c++ make git python-devel mesa* boost boost-devel \ 
+&& yum -y install mpich mpich-devel gcc gcc-c++ make git python-devel mesa* boost boost-devel openssh openssh-server openssh-client \ 
 && yum -y groupinstall "X Window System" \
 && git clone https://github.com/FFmpeg/FFmpeg /root/FFmpeg \
 && cd /root/FFmpeg \
@@ -46,7 +46,23 @@ RUN yum -y update \
 && mv /root/include /usr/local/ParaView_5.1.2 \
 && mv /root/bin /usr/local/ParaView_5.1.2 \
 && mv /root/lib /usr/local/ParaView_5.1.2 \
-&& mv /root/share /usr/local/ParaView_5.1.2
+&& mv /root/share /usr/local/ParaView_5.1.2 \
+&& mkdir /var/run/sshd \
+&& mkdir /root/.ssh \
+&& echo StrictHostKeyChecking=no > /root/.ssh/config \
+&& sed -i -e s/\#PermitRootLogin\ yes/PermitRootLogin\ yes/ /etc/ssh/sshd_config \
+&& sed -i -e s/\#RSAAuthentication\ yes/RSAAuthentication\ yes/ /etc/ssh/sshd_config \
+&& sed -i -e s/\#PubkeyAuthentication\ yes/PubkeyAuthentication\ yes/ /etc/ssh/sshd_config \
+&& sed -i -e s/PasswordAuthentication\ yes/\PasswordAuthentication\ no/ /etc/ssh/sshd_config \
+&& sed -i -e s@HostKey\ /etc/ssh/ssh_host_dsa_key@\#HostKey\ /etc/ssh/ssh_host_dsa_key@ /etc/ssh/sshd_config \
+&& sed -i -e s@HostKey\ /etc/ssh/ssh_host_ecdsa_key@\#HostKey\ /etc/ssh/ssh_host_ecdsa_key@ /etc/ssh/sshd_config \
+&& sed -i -e s@HostKey\ /etc/ssh/ssh_host_ed25519_key@\#HostKey\ /etc/ssh/ssh_host_ed25519_key@ /etc/ssh/sshd_config \
+&& ssh-keygen -t rsa -N "" -f /etc/ssh/ssh_host_rsa_key \
+&& ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa \
+&& mv /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys \
+&& chmod 600 /root/.ssh/authorized_keys \
+&& chmod 600 /root/.ssh/config \
+&& chmod 700 /root/.ssh
 
 # Set PATH
 ENV PATH=$PATH:/usr/lib64/mpich/bin:/usr/local/ParaView_5.1.2/bin
